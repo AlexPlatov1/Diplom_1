@@ -10,6 +10,9 @@ import praktikum.Burger;
 import praktikum.Ingredient;
 import praktikum.IngredientType;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class BurgerTest {
 
     @Mock
@@ -84,7 +87,6 @@ public class BurgerTest {
         when(mockIngredient1.getType()).thenReturn(IngredientType.FILLING);
         when(mockIngredient1.getName()).thenReturn("Lettuce");
         when(mockIngredient1.getPrice()).thenReturn(10f);
-
         when(mockIngredient2.getType()).thenReturn(IngredientType.SAUCE);
         when(mockIngredient2.getName()).thenReturn("Ketchup");
         when(mockIngredient2.getPrice()).thenReturn(5f);
@@ -98,5 +100,70 @@ public class BurgerTest {
         assertTrue(receipt.contains("Ketchup"));
         float expectedPrice = (mockBun.getPrice() * 2) + 10f + 5f;
         assertTrue(receipt.contains(String.format("Price: %.2f", expectedPrice)));
+    }
+
+    //1 вариант
+    @Test
+    public void testGetReceipt2() {
+        when(mockBun.getName()).thenReturn("Sesame");
+        when(mockBun.getPrice()).thenReturn(50f);
+        when(mockIngredient1.getType()).thenReturn(IngredientType.FILLING);
+        when(mockIngredient1.getName()).thenReturn("Lettuce");
+        when(mockIngredient1.getPrice()).thenReturn(10f);
+        when(mockIngredient2.getType()).thenReturn(IngredientType.SAUCE);
+        when(mockIngredient2.getName()).thenReturn("Ketchup");
+        when(mockIngredient2.getPrice()).thenReturn(5f);
+
+        Burger testBurger = new Burger();
+        testBurger.setBuns(mockBun);
+        testBurger.addIngredient(mockIngredient1);
+        testBurger.addIngredient(mockIngredient2);
+
+        String receipt = testBurger.getReceipt();
+        assertTrue(receipt.contains("Sesame"), "Чек должен содержать название булочки");
+        assertTrue(receipt.contains("Lettuce"), "Чек должен содержать название ингредиента Lettuce");
+        assertTrue(receipt.contains("Ketchup"), "Чек должен содержать название ингредиента Ketchup");
+
+        float expectedPrice = (mockBun.getPrice() * 2) + 10f + 5f;
+        String pricePattern = String.format("Price: %.2f", expectedPrice);
+
+        assertTrue(receipt.contains(pricePattern), "Чек должен содержать правильную итоговую цену: " + pricePattern);
+    }
+
+    //2 вариант
+    @Test
+    public void testGetReceipt3() {
+        when(mockBun.getName()).thenReturn("Sesame");
+        when(mockBun.getPrice()).thenReturn(50f);
+        when(mockIngredient1.getType()).thenReturn(IngredientType.FILLING);
+        when(mockIngredient1.getName()).thenReturn("Lettuce");
+        when(mockIngredient1.getPrice()).thenReturn(10f);
+        when(mockIngredient2.getType()).thenReturn(IngredientType.SAUCE);
+        when(mockIngredient2.getName()).thenReturn("KETCHUP");
+        when(mockIngredient2.getPrice()).thenReturn(5f);
+
+        Burger testBurger = new Burger();
+        testBurger.setBuns(mockBun);
+        testBurger.addIngredient(mockIngredient1);
+        testBurger.addIngredient(mockIngredient2);
+
+        String receipt = testBurger.getReceipt();
+        List<String> lines = Arrays.asList(receipt.split("\n"));
+        String[] expectedLines = {
+                "(==== Sesame ====)",
+                "= filling Lettuce =",
+                "= sauce KETCHUP =",
+                "(==== Sesame ====)",
+                "",
+                "Price: 115,000000"
+        };
+
+        for (int i = 0; i < Math.min(lines.size(), expectedLines.length); i++) {
+            assertEquals(expectedLines[i].trim(), lines.get(i).trim(),
+                    "Строка [" + (i+1) + "] не совпадает.");
+        }
+
+        assertEquals(expectedLines.length, lines.size(),
+                "Количество строк в чеке не совпадает.");
     }
 }
